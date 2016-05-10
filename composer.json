@@ -1,0 +1,23 @@
+{
+  "name": "derhansen/sf_event_mgt_indexer",
+  "type": "typo3-cms-extension",
+  "description": "Indexer for ke_search which indexed sf_event_mgt records",
+  "homepage": "https://github.com/derhansen/sf_event_mgt_indexer",
+  "support": {
+	"issues": "https://github.com/derhansen/sf_event_mgt_indexer/issues"
+  },
+  "authors": [
+	{
+	  "name": "Torben Hansen",
+	  "email": "derhansen@gmail.com",
+	  "homepage": "http://www.derhansen.de",
+	  "role": "Developer"
+	}
+  ],
+  "keywords": ["TYPO3 CMS", "ke_search", "sf_event_mgt", "indexer"],
+  "license": ["GPL-2.0+"],
+  "version": "1.0.0",
+  "replace": {
+	"sf_event_mgt": "*"
+  }
+}
