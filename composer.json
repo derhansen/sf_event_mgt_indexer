@@ -18,6 +18,6 @@
   "license": ["GPL-2.0+"],
   "version": "1.0.0",
   "replace": {
-	"sf_event_mgt": "*"
+	"sf_event_mgt_indexer": "*"
   }
 }
