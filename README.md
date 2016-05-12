@@ -3,7 +3,7 @@ ke_search indexer for sf_event_mgt
 
 ## What is it?
 
-Indexer for ke_search which indexed sf_event_mgt records
+Indexer for ke_search which indexes sf_event_mgt records
 
 ## Usage
 
