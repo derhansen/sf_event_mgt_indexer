@@ -82,9 +82,6 @@ class user_kesearchhooks
                         'orig_pid' => $record['pid'],
                     );
 
-                    // add something to the title, just to identify the entries
-                    // in the frontend
-                    $title = '[Event] ' . $title;
                     // ... and store the information in the index
                     $indexerObject->storeInIndex(
                         $indexerConfig['storagepid'], // storage PID
