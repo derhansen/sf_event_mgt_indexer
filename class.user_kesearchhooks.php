@@ -74,7 +74,7 @@ class user_kesearchhooks
                     $content = strip_tags($record['description']);
                     $program = strip_tags($record['$program']);
                     $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program;
-                    $params = '&tx_sfeventmgt_pievent[event]=' . $record['uid'];
+                    $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[action]=Event&tx_sfeventmgt_pievent[event]=' . $record['uid'];
                     $tags = '#event#';
                     $additionalFields = array(
                         'sortdate' => $record['crdate'],
@@ -91,7 +91,7 @@ class user_kesearchhooks
                         $fullContent, // indexed content, includes the title (linebreak after title)
                         $tags, // tags for faceted search
                         $params, // typolink params for singleview
-                        $abstract, // abstract; shown in result list if not empty
+                        $teaser, // abstract; shown in result list if not empty
                         $record['sys_language_uid'], // language uid
                         $record['starttime'], // starttime
                         $record['endtime'], // endtime
@@ -111,7 +111,7 @@ class user_kesearchhooks
      * Returns all storage Pids for indexing
      *
      * @param $config
-     * @return array
+     * @return string
      */
     protected function getPidList($config)
     {
