@@ -29,7 +29,7 @@ ke_search indexer for sf_event_mgt
 		ke_search, sf_event_mgt
 
 	:Copyright:
-		2014 - 2016
+		2014 - 2019
 
 	:Author:
 		Torben Hansen

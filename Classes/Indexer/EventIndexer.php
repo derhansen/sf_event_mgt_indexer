@@ -1,22 +1,30 @@
 <?php
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
- */
+namespace Derhansen\SfEventMgtIndexer\Indexer;
 
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class user_kesearchhooks
+/**
+ * Class EventIndexer
+ */
+class EventIndexer
 {
+    const TABLE = 'tx_sfeventmgt_domain_model_event';
+
+    /**
+     * @var ConnectionPool
+     */
+    protected $connectionPool = null;
+
+    /**
+     * ProductIndexer constructor.
+     */
+    public function __construct()
+    {
+        $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
+    }
 
     /**
      * Registers the indexer configuration
@@ -30,7 +38,7 @@ class user_kesearchhooks
         $newArray = [
             'Events (sf_event_mgt)',
             'sfeventmgt',
-            \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath('sf_event_mgt_indexer') . 'ext_icon.gif'
+            GeneralUtility::getFileAbsFileName('EXT:sf_event_mgt_indexer/ext_icon.svg')
         ];
         $params['items'][] = $newArray;
     }
@@ -51,35 +59,25 @@ class user_kesearchhooks
                 return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed - Error: No storage Pids configured</b></p>';
             }
 
-            // get all the entries to index
-            // don't index hidden or deleted elements, BUT
-            // get the elements with frontend user group access restrictions
-            // or time (start / stop) restrictions.
-            // Copy those restrictions to the index.
-            $fields = '*';
-            $table = 'tx_sfeventmgt_domain_model_event';
-            $where = 'pid IN (' . $indexPids . ') AND hidden = 0 AND deleted = 0';
-            $groupBy = '';
-            $orderBy = '';
-            $limit = '';
-            $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $table, $where, $groupBy, $orderBy, $limit);
-            $resCount = $GLOBALS['TYPO3_DB']->sql_num_rows($res);
-            // Loop through the records and write them to the index.
-            if ($resCount) {
-                while (($record = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+            $queryBuilder = $this->connectionPool->getQueryBuilderForTable(self::TABLE);
+            $events = $queryBuilder->select('*')->from(self::TABLE)->execute()->fetchAll();
+
+            $eventCount = count($events);
+            if ($eventCount) {
+                foreach ($events as $event) {
                     // compile the information which should go into the index
                     // the field names depend on the table you want to index!
-                    $title = strip_tags($record['title']);
-                    $teaser = strip_tags($record['teaser']);
-                    $content = strip_tags($record['description']);
-                    $program = strip_tags($record['$program']);
+                    $title = strip_tags($event['title']);
+                    $teaser = strip_tags($event['teaser']);
+                    $content = strip_tags($event['description']);
+                    $program = strip_tags($event['$program']);
                     $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program;
-                    $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[action]=Event&tx_sfeventmgt_pievent[event]=' . $record['uid'];
+                    $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[controller]=Event&tx_sfeventmgt_pievent[event]=' . $event['uid'];
                     $tags = '#event#';
                     $additionalFields = array(
-                        'sortdate' => $record['crdate'],
-                        'orig_uid' => $record['uid'],
-                        'orig_pid' => $record['pid'],
+                        'sortdate' => $event['crdate'],
+                        'orig_uid' => $event['uid'],
+                        'orig_pid' => $event['pid'],
                     );
 
                     // ... and store the information in the index
@@ -92,15 +90,15 @@ class user_kesearchhooks
                         $tags, // tags for faceted search
                         $params, // typolink params for singleview
                         $teaser, // abstract; shown in result list if not empty
-                        $record['sys_language_uid'], // language uid
-                        $record['starttime'], // starttime
-                        $record['endtime'], // endtime
-                        $record['fe_group'], // fe_group
+                        $event['sys_language_uid'], // language uid
+                        $event['starttime'], // starttime
+                        $event['endtime'], // endtime
+                        $event['fe_group'], // fe_group
                         false, // debug only?
                         $additionalFields // additionalFields
                     );
                 }
-                $content = '<p><b>Event Indexer "' . $indexerConfig['title'] . '":</b><br/>' . $resCount .
+                $content = '<p><b>Event Indexer "' . $indexerConfig['title'] . '":</b><br/>' . $eventCount .
                     ' Elements have been indexed.</p>';
             }
         }
@@ -138,7 +136,7 @@ class user_kesearchhooks
             return $pidList;
         }
 
-        $queryGenerator = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Database\\QueryGenerator');
+        $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
         $recursiveStoragePids = $pidList;
         $storagePids = GeneralUtility::intExplode(',', $pidList);
         foreach ($storagePids as $startPid) {
