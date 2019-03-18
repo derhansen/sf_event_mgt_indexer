@@ -80,6 +80,14 @@ class EventIndexer
                         'orig_pid' => $event['pid'],
                     );
 
+                    // Hook to modify/extend additional fields (e.g. if start- and enddate should be indexed)
+                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'])) {
+                        foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] as $_classRef) {
+                            $_procObj = &GeneralUtility::makeInstance($_classRef);
+                            $_procObj->modifyAdditionalFields($additionalFields, $event);
+                        }
+                    }
+
                     // ... and store the information in the index
                     $indexerObject->storeInIndex(
                         $indexerConfig['storagepid'], // storage PID
