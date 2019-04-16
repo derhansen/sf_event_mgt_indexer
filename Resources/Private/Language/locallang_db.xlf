@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2019-04-16T09:04:04Z"
+          product-name="sf_event_mgt_indexer">
+        <header/>
+        <body>
+            <trans-unit id="event_restriction">
+                <source>Event indexing restriction</source>
+            </trans-unit>
+            <trans-unit id="event_restriction.items.0">
+                <source>Index all events (past and future)</source>
+            </trans-unit>
+            <trans-unit id="event_restriction.items.1">
+                <source>Index only future events</source>
+            </trans-unit>
+            <trans-unit id="event_restriction.items.2">
+                <source>Index only past events</source>
+            </trans-unit>
+            <trans-unit id="category_mode">
+                <source>Index only events of the following categories</source>
+            </trans-unit>
+            <trans-unit id="category_mode.items.0">
+                <source>All</source>
+            </trans-unit>
+            <trans-unit id="category_mode.items.1">
+                <source>Only the following categories</source>
+            </trans-unit>
+            <trans-unit id="categories">
+                <source>Categories</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

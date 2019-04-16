@@ -2,6 +2,7 @@
 
 namespace Derhansen\SfEventMgtIndexer\Indexer;
 
+use TeaminmediasPluswerk\KeSearch\Lib\Db;
 use TeaminmediasPluswerk\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\QueryGenerator;
@@ -60,12 +61,16 @@ class EventIndexer
                 return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed - Error: No storage Pids configured</b></p>';
             }
 
-            $queryBuilder = $this->connectionPool->getQueryBuilderForTable(self::TABLE);
-            $events = $queryBuilder->select('*')->from(self::TABLE)->execute()->fetchAll();
+            $events = $this->getEvents($indexerConfig);
 
-            $eventCount = count($events);
-            if ($eventCount) {
+            $eventCount = 0;
+            if (count($events)) {
                 foreach ($events as $event) {
+                    // Check if indexing of event should be skipped due to indexer category restriction
+                    if (!$this->eventHasCategoryOfIndexerConfig($event['uid'], $indexerConfig)) {
+                        continue;
+                    }
+
                     // compile the information which should go into the index
                     // the field names depend on the table you want to index!
                     $title = strip_tags($event['title']);
@@ -110,12 +115,53 @@ class EventIndexer
                         false, // debug only?
                         $additionalFields // additionalFields
                     );
+
+                    $eventCount++;
                 }
                 $content = '<p><b>Event Indexer "' . $indexerConfig['title'] . '":</b><br/>' . $eventCount .
                     ' Elements have been indexed.</p>';
             }
         }
         return $content;
+    }
+
+    /**
+     * Returns events to be indexed
+     *
+     * @param array $indexerConfig
+     * @return array
+     */
+    protected function getEvents($indexerConfig)
+    {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable(self::TABLE);
+
+        $indexPids = GeneralUtility::intExplode(',', $this->getPidList($indexerConfig), true);
+
+        $where = [];
+        $where[] = $queryBuilder->expr()->in('pid', implode(',', $indexPids));
+
+        // Evaluate event restriction
+        if (isset($indexerConfig['index_extsfeventmgt_event_restriction'])) {
+            switch ($indexerConfig['index_extsfeventmgt_event_restriction']) {
+                case 0:
+                    break;
+                case 1:
+                    $where[] = $queryBuilder->expr()->gte('startdate', time());
+                    break;
+                case 2:
+                    $where[] = $queryBuilder->expr()->lt('enddate', time());
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        $events = $queryBuilder->select('*')
+            ->from(self::TABLE)
+            ->where(...$where)
+            ->execute()
+            ->fetchAll();
+        return $events;
     }
 
     /**
@@ -159,5 +205,86 @@ class EventIndexer
             }
         }
         return $recursiveStoragePids;
+    }
+
+    /**
+     * Returns true, if event shall be indexed based on the indexer category_mode and category_selection
+     *
+     * @param int $eventUid
+     * @param array $indexerConfig
+     * @return bool
+     */
+    protected function eventHasCategoryOfIndexerConfig($eventUid, $indexerConfig)
+    {
+        // If category restriction should be ignored, return true
+        if ((int)$indexerConfig['index_extsfeventmgt_category_mode'] === 0) {
+            return true;
+        }
+
+        // If no categories configured, the indexer migt have been misconfigured, so we always return false
+        if (!$indexerConfig['index_extsfeventmgt_category_selection']) {
+            return false;
+        }
+
+        $includeCategoryUids = GeneralUtility::intExplode(
+            ',',
+            $indexerConfig['index_extsfeventmgt_category_selection']
+        );
+        $eventCategoryUids = $this->getEventCategoryUids($eventUid);
+        foreach ($eventCategoryUids as $eventCategoryUid) {
+            if (in_array($eventCategoryUid, $includeCategoryUids)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns an array of category uids assigned to the given event record
+     *
+     * @param int $eventUid
+     * @return array
+     */
+    protected function getEventCategoryUids($eventUid)
+    {
+        $queryBuilder = Db::getQueryBuilder('sys_category');
+
+        $where = [];
+        $where[] = $queryBuilder->expr()->eq(
+            'sys_category.uid',
+            $queryBuilder->quoteIdentifier('sys_category_record_mm.uid_local')
+        );
+        $where[] = $queryBuilder->expr()->eq(
+            self::TABLE . '.uid',
+            $queryBuilder->quoteIdentifier('sys_category_record_mm.uid_foreign')
+        );
+        $where[] = $queryBuilder->expr()->eq(
+            self::TABLE . '.uid',
+            $queryBuilder->createNamedParameter($eventUid, \PDO::PARAM_INT)
+        );
+        $where[] = $queryBuilder->expr()->eq(
+            'sys_category_record_mm.tablenames',
+            $queryBuilder->createNamedParameter(self::TABLE, \PDO::PARAM_STR)
+        );
+
+        $catRes = $queryBuilder
+            ->select(
+                'sys_category.uid'
+            )
+            ->from('sys_category')
+            ->from('sys_category_record_mm')
+            ->from(self::TABLE)
+            ->orderBy('sys_category_record_mm.sorting')
+            ->where(...$where)
+            ->execute()
+            ->fetchAll();
+
+        $result = [];
+        foreach ($catRes as $categoryUid) {
+            $result[] = $categoryUid['uid'];
+        }
+
+        return $result;
     }
 }
