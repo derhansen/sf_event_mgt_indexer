@@ -2,6 +2,7 @@
 
 namespace Derhansen\SfEventMgtIndexer\Indexer;
 
+use TeaminmediasPluswerk\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -74,6 +75,10 @@ class EventIndexer
                     $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program;
                     $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[controller]=Event&tx_sfeventmgt_pievent[event]=' . $event['uid'];
                     $tags = '#event#';
+
+                    // Add system categories as tags
+                    SearchHelper::makeSystemCategoryTags($tags, $event['uid'], self::TABLE);
+
                     $additionalFields = array(
                         'sortdate' => $event['crdate'],
                         'orig_uid' => $event['uid'],
