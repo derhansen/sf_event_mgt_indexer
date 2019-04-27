@@ -2,8 +2,6 @@
 
 namespace Derhansen\SfEventMgtIndexer\Indexer;
 
-use TeaminmediasPluswerk\KeSearch\Lib\Db;
-use TeaminmediasPluswerk\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -81,8 +79,16 @@ class EventIndexer
                     $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[controller]=Event&tx_sfeventmgt_pievent[event]=' . $event['uid'];
                     $tags = '#event#';
 
-                    // Add system categories as tags
-                    SearchHelper::makeSystemCategoryTags($tags, $event['uid'], self::TABLE);
+                    // Add system categories as tags (v8.7 and 9.5)
+                    if (class_exists(\TeaminmediasPluswerk\KeSearch\Lib\SearchHelper::class)) {
+                        \TeaminmediasPluswerk\KeSearch\Lib\SearchHelper::makeSystemCategoryTags(
+                            $tags,
+                            $event['uid'],
+                            self::TABLE
+                        );
+                    } else {
+                        \tx_kesearch_helper::makeSystemCategoryTags($tags, $event['uid'], self::TABLE);
+                    }
 
                     $additionalFields = array(
                         'sortdate' => $event['crdate'],
@@ -248,7 +254,8 @@ class EventIndexer
      */
     protected function getEventCategoryUids($eventUid)
     {
-        $queryBuilder = Db::getQueryBuilder('sys_category');
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_category')->createQueryBuilder();
 
         $where = [];
         $where[] = $queryBuilder->expr()->eq(
