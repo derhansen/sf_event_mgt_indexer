@@ -74,7 +74,7 @@ class EventIndexer
                     $title = strip_tags($event['title']);
                     $teaser = strip_tags($event['teaser']);
                     $content = strip_tags($event['description']);
-                    $program = strip_tags($event['$program']);
+                    $program = strip_tags($event['program']);
                     $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program;
                     $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[controller]=Event&tx_sfeventmgt_pievent[event]=' . $event['uid'];
                     $tags = '#event#';
