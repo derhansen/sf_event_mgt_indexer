@@ -24,3 +24,9 @@ to index additional event properties like start- and enddate)
 
 This extension is hosted in GitHub. Please report feedback, bugs and change requests directly at 
 https://github.com/derhansen/sf_event_mgt_indexer
+
+Updates will be published on TER and packagist.
+
+## Support
+
+If you need commercial support or want to sponsor new features, please contact me directly by e-mail.
