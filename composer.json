@@ -24,7 +24,6 @@
     }
   },
   "replace": {
-    "sf_event_mgt_indexer": "self.version",
     "typo3-ter/sf-event-mgt-indexer": "self.version"
   }
 }
