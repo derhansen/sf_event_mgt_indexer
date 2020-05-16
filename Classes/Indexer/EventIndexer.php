@@ -149,8 +149,6 @@ class EventIndexer
         // Evaluate event restriction
         if (isset($indexerConfig['index_extsfeventmgt_event_restriction'])) {
             switch ($indexerConfig['index_extsfeventmgt_event_restriction']) {
-                case 0:
-                    break;
                 case 1:
                     $where[] = $queryBuilder->expr()->gte('startdate', time());
                     break;
@@ -162,12 +160,11 @@ class EventIndexer
             }
         }
 
-        $events = $queryBuilder->select('*')
+        return $queryBuilder->select('*')
             ->from(self::TABLE)
             ->where(...$where)
             ->execute()
             ->fetchAll();
-        return $events;
     }
 
     /**

@@ -30,5 +30,8 @@
     "typo3/cms": {
       "extension-key": "sf_event_mgt_indexer"
     }
+  },
+  "require": {
+    "ext-pdo": "*"
   }
 }
