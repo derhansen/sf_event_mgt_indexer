@@ -52,7 +52,7 @@ $fields = [
                     '1'
                 ],
             ],
-            'default' => 1,
+            'default' => 0,
             'size' => 1,
             'maxitems' => 1,
         ]
