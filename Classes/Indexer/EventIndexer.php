@@ -112,6 +112,14 @@ class EventIndexer
                         }
                     }
 
+                    // Hook to modify the fields 'title', 'fullContent' and 'teaser
+                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'])) {
+                        foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'] as $_classRef) {
+                            $_procObj = &GeneralUtility::makeInstance($_classRef);
+                            $_procObj->modifyIndexContent($title, $fullContent, $teaser, $event);
+                        }
+                    }
+
                     // ... and store the information in the index
                     $indexerObject->storeInIndex(
                         $indexerConfig['storagepid'], // storage PID
