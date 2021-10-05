@@ -87,7 +87,15 @@ class EventIndexer
                             self::TABLE
                         );
                     } else {
-                        \tx_kesearch_helper::makeSystemCategoryTags($tags, $event['uid'], self::TABLE);
+                        if (class_exists(\Tpwd\KeSearch\Lib\SearchHelper::class)) {
+                            \Tpwd\KeSearch\Lib\SearchHelper::makeSystemCategoryTags(
+                                $tags,
+                                $event['uid'],
+                                self::TABLE
+                            );
+                        } else {
+                            \tx_kesearch_helper::makeSystemCategoryTags($tags, $event['uid'], self::TABLE);
+                        }
                     }
 
                     $additionalFields = array(
