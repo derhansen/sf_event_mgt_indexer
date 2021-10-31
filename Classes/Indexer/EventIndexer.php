@@ -2,8 +2,10 @@
 
 namespace Derhansen\SfEventMgtIndexer\Indexer;
 
+use DERHANSEN\SfEventMgt\Utility\PageUtility;
+use Tpwd\KeSearch\Indexer\IndexerRunner;
+use Tpwd\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -13,14 +15,8 @@ class EventIndexer
 {
     const TABLE = 'tx_sfeventmgt_domain_model_event';
 
-    /**
-     * @var ConnectionPool
-     */
-    protected $connectionPool = null;
+    protected ConnectionPool $connectionPool;
 
-    /**
-     * ProductIndexer constructor.
-     */
     public function __construct()
     {
         $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
@@ -32,13 +28,13 @@ class EventIndexer
      * @param array $params
      * @param $pObj
      */
-    public function registerIndexerConfiguration(&$params, $pObj)
+    public function registerIndexerConfiguration(array &$params, $pObj)
     {
         // add item to "type" field
         $newArray = [
             'Events (sf_event_mgt)',
             'sfeventmgt',
-            GeneralUtility::getFileAbsFileName('EXT:sf_event_mgt_indexer/ext_icon.svg')
+            GeneralUtility::getFileAbsFileName('EXT:sf_event_mgt_indexer/Resources/Public/Icons/Extension.svg')
         ];
         $params['items'][] = $newArray;
     }
@@ -47,10 +43,10 @@ class EventIndexer
      * sf_event_mgt indexer for ke_search
      *
      * @param array $indexerConfig Configuration from TYPO3 Backend
-     * @param array $indexerObject Reference to indexer class.
+     * @param IndexerRunner $indexerObject Reference to indexer class.
      * @return string Output.
      */
-    public function customIndexer(&$indexerConfig, &$indexerObject)
+    public function customIndexer(array &$indexerConfig, IndexerRunner &$indexerObject): string
     {
         $content = '';
         if ($indexerConfig['type'] === 'sfeventmgt') {
@@ -69,34 +65,20 @@ class EventIndexer
                         continue;
                     }
 
-                    // compile the information which should go into the index
-                    // the field names depend on the table you want to index!
                     $title = strip_tags($event['title']);
                     $teaser = strip_tags($event['teaser']);
                     $content = strip_tags($event['description']);
                     $program = strip_tags($event['program']);
                     $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program;
-                    $params = '&tx_sfeventmgt_pievent[action]=detail&tx_sfeventmgt_pievent[controller]=Event&tx_sfeventmgt_pievent[event]=' . $event['uid'];
+                    $params = '&tx_sfeventmgt_pieventdetail[action]=detail&tx_sfeventmgt_pieventdetail[controller]=Event&tx_sfeventmgt_pieventdetail[event]=' . $event['uid'];
                     $tags = '#event#';
 
-                    // Add system categories as tags (v8.7 and 9.5)
-                    if (class_exists(\TeaminmediasPluswerk\KeSearch\Lib\SearchHelper::class)) {
-                        \TeaminmediasPluswerk\KeSearch\Lib\SearchHelper::makeSystemCategoryTags(
-                            $tags,
-                            $event['uid'],
-                            self::TABLE
-                        );
-                    } else {
-                        if (class_exists(\Tpwd\KeSearch\Lib\SearchHelper::class)) {
-                            \Tpwd\KeSearch\Lib\SearchHelper::makeSystemCategoryTags(
-                                $tags,
-                                $event['uid'],
-                                self::TABLE
-                            );
-                        } else {
-                            \tx_kesearch_helper::makeSystemCategoryTags($tags, $event['uid'], self::TABLE);
-                        }
-                    }
+                    // Add system categories as tags
+                    SearchHelper::makeSystemCategoryTags(
+                        $tags,
+                        $event['uid'],
+                        self::TABLE
+                    );
 
                     $additionalFields = array(
                         'sortdate' => $event['crdate'],
@@ -107,7 +89,7 @@ class EventIndexer
                     // Hook to modify/extend additional fields (e.g. if start- and enddate should be indexed)
                     if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'])) {
                         foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] as $_classRef) {
-                            $_procObj = &GeneralUtility::makeInstance($_classRef);
+                            $_procObj = GeneralUtility::makeInstance($_classRef);
                             $_procObj->modifyAdditionalFields($additionalFields, $event);
                         }
                     }
@@ -115,7 +97,7 @@ class EventIndexer
                     // Hook to modify the fields 'title', 'fullContent' and 'teaser
                     if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'])) {
                         foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'] as $_classRef) {
-                            $_procObj = &GeneralUtility::makeInstance($_classRef);
+                            $_procObj = GeneralUtility::makeInstance($_classRef);
                             $_procObj->modifyIndexContent($title, $fullContent, $teaser, $event);
                         }
                     }
@@ -153,7 +135,7 @@ class EventIndexer
      * @param array $indexerConfig
      * @return array
      */
-    protected function getEvents($indexerConfig)
+    protected function getEvents(array $indexerConfig): array
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable(self::TABLE);
 
@@ -189,41 +171,14 @@ class EventIndexer
      * @param $config
      * @return string
      */
-    protected function getPidList($config)
+    protected function getPidList($config): string
     {
-        $recursivePids = $this->extendPidListByChildren($config['startingpoints_recursive'], 99);
+        $recursivePids = PageUtility::extendPidListByChildren($config['startingpoints_recursive'], 99);
         if ($config['sysfolder']) {
             return $recursivePids . ',' . $config['sysfolder'];
         } else {
             return $recursivePids;
         }
-    }
-
-    /**
-     * Find all ids from given ids and level
-     *
-     * @param string $pidList comma separated list of ids
-     * @param integer $recursive recursive levels
-     * @return string comma separated list of ids
-     */
-    protected function extendPidListByChildren($pidList = '', $recursive = 0)
-    {
-        $recursive = (int)$recursive;
-
-        if ($recursive <= 0) {
-            return $pidList;
-        }
-
-        $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
-        $recursiveStoragePids = $pidList;
-        $storagePids = GeneralUtility::intExplode(',', $pidList);
-        foreach ($storagePids as $startPid) {
-            $pids = $queryGenerator->getTreeList($startPid, $recursive, 0, 1);
-            if (strlen($pids) > 0) {
-                $recursiveStoragePids .= ',' . $pids;
-            }
-        }
-        return $recursiveStoragePids;
     }
 
     /**
@@ -233,7 +188,7 @@ class EventIndexer
      * @param array $indexerConfig
      * @return bool
      */
-    protected function eventHasCategoryOfIndexerConfig($eventUid, $indexerConfig)
+    protected function eventHasCategoryOfIndexerConfig(int $eventUid, array $indexerConfig): bool
     {
         // If category restriction should be ignored, return true
         if ((int)$indexerConfig['index_extsfeventmgt_category_mode'] === 0) {
@@ -265,7 +220,7 @@ class EventIndexer
      * @param int $eventUid
      * @return array
      */
-    protected function getEventCategoryUids($eventUid)
+    protected function getEventCategoryUids(int $eventUid): array
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('sys_category')->createQueryBuilder();
