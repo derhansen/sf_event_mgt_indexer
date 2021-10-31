@@ -30,6 +30,13 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexConte
 
 This hook can be used to modify the content to index. See in code for details, which field values can be modified.
 
+## Versions
+
+| Version             | TYPO3       | PHP       |
+| ------------------- | ----------- | ----------|
+| 3.0                 | 11.5        | >= 7.4    |
+| 2.x                 | 8.7 - 10.4  | 7.0 - 7.4 |
+
 ## Feedback and updates
 
 This extension is hosted in GitHub. Please report feedback, bugs and change requests directly at

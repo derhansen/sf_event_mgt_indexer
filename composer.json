@@ -10,7 +10,7 @@
     {
       "name": "Torben Hansen",
       "email": "torben@derhansen.com",
-      "homepage": "http://www.derhansen.com",
+      "homepage": "https://www.derhansen.com",
       "role": "Developer"
     }
   ],
@@ -32,6 +32,8 @@
     }
   },
   "require": {
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "typo3/cms-core": "^11.5",
+    "derhansen/sf_event_mgt": "^6.0.0"
   }
 }
