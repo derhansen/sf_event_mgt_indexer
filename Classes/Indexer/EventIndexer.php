@@ -87,7 +87,7 @@ class EventIndexer
                     );
 
                     // Hook to modify/extend additional fields (e.g. if start- and enddate should be indexed)
-                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'])) {
+                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] ?? null)) {
                         foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] as $_classRef) {
                             $_procObj = GeneralUtility::makeInstance($_classRef);
                             $_procObj->modifyAdditionalFields($additionalFields, $event);
@@ -95,7 +95,7 @@ class EventIndexer
                     }
 
                     // Hook to modify the fields 'title', 'fullContent' and 'teaser
-                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'])) {
+                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'] ?? null)) {
                         foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'] as $_classRef) {
                             $_procObj = GeneralUtility::makeInstance($_classRef);
                             $_procObj->modifyIndexContent($title, $fullContent, $teaser, $event);
