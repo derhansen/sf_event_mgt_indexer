@@ -34,6 +34,7 @@
   "require": {
     "ext-pdo": "*",
     "typo3/cms-core": "^11.5",
-    "derhansen/sf_event_mgt": "^6.0.0"
+    "derhansen/sf_event_mgt": "^6.0.0",
+    "tpwd/ke_search": "^4.0.0"
   }
 }
