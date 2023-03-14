@@ -3,6 +3,7 @@
 namespace Derhansen\SfEventMgtIndexer\Indexer;
 
 use DERHANSEN\SfEventMgt\Utility\PageUtility;
+use Tpwd\KeSearch\Indexer\IndexerBase;
 use Tpwd\KeSearch\Indexer\IndexerRunner;
 use Tpwd\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -11,16 +12,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * Class EventIndexer
  */
-class EventIndexer
+class EventIndexer extends IndexerBase
 {
     const TABLE = 'tx_sfeventmgt_domain_model_event';
 
     protected ConnectionPool $connectionPool;
-
-    public function __construct()
-    {
-        $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
-    }
 
     /**
      * Registers the indexer configuration
@@ -44,13 +40,15 @@ class EventIndexer
      *
      * @param array $indexerConfig Configuration from TYPO3 Backend
      * @param IndexerRunner $indexerObject Reference to indexer class.
-     * @return string Output.
+     * @return string
      */
     public function customIndexer(array &$indexerConfig, IndexerRunner &$indexerObject): string
     {
+        $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
+
         $content = '';
         if ($indexerConfig['type'] === 'sfeventmgt') {
-            $indexPids = $this->getPidList($indexerConfig);
+            $indexPids = $this->getIndexerStoragePages($indexerConfig);
             if ($indexPids === '') {
                 return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed - Error: No storage Pids configured</b></p>';
             }
@@ -131,15 +129,12 @@ class EventIndexer
 
     /**
      * Returns events to be indexed
-     *
-     * @param array $indexerConfig
-     * @return array
      */
     protected function getEvents(array $indexerConfig): array
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable(self::TABLE);
 
-        $indexPids = GeneralUtility::intExplode(',', $this->getPidList($indexerConfig), true);
+        $indexPids = GeneralUtility::intExplode(',', $this->getIndexerStoragePages($indexerConfig), true);
 
         $where = [];
         $where[] = $queryBuilder->expr()->in('pid', implode(',', $indexPids));
@@ -162,31 +157,24 @@ class EventIndexer
             ->from(self::TABLE)
             ->where(...$where)
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
      * Returns all storage Pids for indexing
-     *
-     * @param $config
-     * @return string
      */
-    protected function getPidList($config): string
+    protected function getIndexerStoragePages(array $config): string
     {
         $recursivePids = PageUtility::extendPidListByChildren($config['startingpoints_recursive'], 99);
         if ($config['sysfolder']) {
             return $recursivePids . ',' . $config['sysfolder'];
-        } else {
-            return $recursivePids;
         }
+
+        return $recursivePids;
     }
 
     /**
      * Returns true, if event shall be indexed based on the indexer category_mode and category_selection
-     *
-     * @param int $eventUid
-     * @param array $indexerConfig
-     * @return bool
      */
     protected function eventHasCategoryOfIndexerConfig(int $eventUid, array $indexerConfig): bool
     {
@@ -216,9 +204,6 @@ class EventIndexer
 
     /**
      * Returns an array of category uids assigned to the given event record
-     *
-     * @param int $eventUid
-     * @return array
      */
     protected function getEventCategoryUids(int $eventUid): array
     {
@@ -244,16 +229,14 @@ class EventIndexer
         );
 
         $catRes = $queryBuilder
-            ->select(
-                'sys_category.uid'
-            )
+            ->select('sys_category.uid')
             ->from('sys_category')
             ->from('sys_category_record_mm')
             ->from(self::TABLE)
             ->orderBy('sys_category_record_mm.sorting')
             ->where(...$where)
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
 
         $result = [];
         foreach ($catRes as $categoryUid) {
