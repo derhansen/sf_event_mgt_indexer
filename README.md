@@ -33,8 +33,8 @@ This hook can be used to modify the content to index. See in code for details, w
 ## Versions
 
 | Version             | TYPO3       | PHP       |
-| ------------------- | ----------- | ----------|
-| 3.0                 | 11.5        | >= 7.4    |
+| ------------------- | ----------- |-----------|
+| 3.0                 | 11.5        | 7.4 - 8.1 |
 | 2.x                 | 8.7 - 10.4  | 7.0 - 7.4 |
 
 ## Feedback and updates
