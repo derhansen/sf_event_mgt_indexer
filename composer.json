@@ -33,8 +33,8 @@
   },
   "require": {
     "ext-pdo": "*",
-    "typo3/cms-core": "^11.5",
-    "derhansen/sf_event_mgt": "^6.0.0",
-    "tpwd/ke_search": "^4.0.0"
+    "typo3/cms-core": "^11.5 || ^12.4",
+    "derhansen/sf_event_mgt": "^6.0 || ^7.0",
+    "tpwd/ke_search": "^4.0 || ^5.0"
   }
 }
