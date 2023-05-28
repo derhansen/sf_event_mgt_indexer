@@ -74,7 +74,10 @@ class EventIndexer extends IndexerBase
                     $teaser = strip_tags($event['teaser']);
                     $content = strip_tags($event['description']);
                     $program = strip_tags($event['program']);
-                    $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program;
+                    $metaKeywords = strip_tags($event['meta_keywords'] ?? '');
+                    $metaDescription = strip_tags($event['meta_description'] ?? '');
+                    $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program . "\n" .
+                        $metaKeywords . "\n" . $metaDescription;
                     $params = '&tx_sfeventmgt_pieventdetail[action]=detail&tx_sfeventmgt_pieventdetail[controller]=Event&tx_sfeventmgt_pieventdetail[event]=' . $event['uid'];
                     $tags = '#event#';
 
