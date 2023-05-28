@@ -6,6 +6,7 @@ use DERHANSEN\SfEventMgt\Utility\PageUtility;
 use Tpwd\KeSearch\Indexer\IndexerBase;
 use Tpwd\KeSearch\Indexer\IndexerRunner;
 use Tpwd\KeSearch\Lib\SearchHelper;
+use TYPO3\CMS\Backend\Form\FormDataProvider\TcaSelectItems;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -20,11 +21,8 @@ class EventIndexer extends IndexerBase
 
     /**
      * Registers the indexer configuration
-     *
-     * @param array $params
-     * @param $pObj
      */
-    public function registerIndexerConfiguration(array &$params, $pObj)
+    public function registerIndexerConfiguration(array &$params, TcaSelectItems $pObj): void
     {
         // add item to "type" field
         $newArray = [
@@ -42,7 +40,7 @@ class EventIndexer extends IndexerBase
      * @param IndexerRunner $indexerObject Reference to indexer class.
      * @return string
      */
-    public function customIndexer(array &$indexerConfig, IndexerRunner &$indexerObject): string
+    public function customIndexer(array &$indexerConfig, IndexerRunner $indexerObject): string
     {
         $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
 
@@ -156,7 +154,7 @@ class EventIndexer extends IndexerBase
         return $queryBuilder->select('*')
             ->from(self::TABLE)
             ->where(...$where)
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 
@@ -183,7 +181,7 @@ class EventIndexer extends IndexerBase
             return true;
         }
 
-        // If no categories configured, the indexer migt have been misconfigured, so we always return false
+        // If no categories configured, the indexer might have been misconfigured, so we always return false
         if (!$indexerConfig['index_extsfeventmgt_category_selection']) {
             return false;
         }
@@ -194,7 +192,7 @@ class EventIndexer extends IndexerBase
         );
         $eventCategoryUids = $this->getEventCategoryUids($eventUid);
         foreach ($eventCategoryUids as $eventCategoryUid) {
-            if (in_array($eventCategoryUid, $includeCategoryUids)) {
+            if (in_array($eventCategoryUid, $includeCategoryUids, true)) {
                 return true;
             }
         }
@@ -235,7 +233,7 @@ class EventIndexer extends IndexerBase
             ->from(self::TABLE)
             ->orderBy('sys_category_record_mm.sorting')
             ->where(...$where)
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         $result = [];
