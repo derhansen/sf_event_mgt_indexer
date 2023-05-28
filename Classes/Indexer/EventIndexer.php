@@ -1,8 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Extension "sf_event_mgt_indexer" for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ */
+
 namespace Derhansen\SfEventMgtIndexer\Indexer;
 
 use DERHANSEN\SfEventMgt\Utility\PageUtility;
+use Derhansen\SfEventMgtIndexer\Events\ModifyIndexDataEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Tpwd\KeSearch\Indexer\IndexerBase;
 use Tpwd\KeSearch\Indexer\IndexerRunner;
 use Tpwd\KeSearch\Lib\SearchHelper;
@@ -18,6 +29,7 @@ class EventIndexer extends IndexerBase
     const TABLE = 'tx_sfeventmgt_domain_model_event';
 
     protected ConnectionPool $connectionPool;
+    protected EventDispatcherInterface $eventDispatcher;
 
     /**
      * Registers the indexer configuration
@@ -39,6 +51,7 @@ class EventIndexer extends IndexerBase
     public function customIndexer(array &$indexerConfig, IndexerRunner $indexerObject): string
     {
         $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
+        $this->eventDispatcher = GeneralUtility::makeInstance(EventDispatcherInterface::class);
 
         $content = '';
         if ($indexerConfig['type'] === 'sfeventmgt') {
@@ -78,38 +91,32 @@ class EventIndexer extends IndexerBase
                         'orig_pid' => $event['pid'],
                     ];
 
-                    // Hook to modify/extend additional fields (e.g. if start- and enddate should be indexed)
-                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] ?? null)) {
-                        foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] as $_classRef) {
-                            $_procObj = GeneralUtility::makeInstance($_classRef);
-                            $_procObj->modifyAdditionalFields($additionalFields, $event);
-                        }
-                    }
+                    // PSR-14 event to allow modification of index data
+                    $modifyIndexDataEvent = new ModifyIndexDataEvent(
+                        $title,
+                        $teaser,
+                        $fullContent,
+                        $additionalFields,
+                        $event
+                    );
+                    $this->eventDispatcher->dispatch($modifyIndexDataEvent);
 
-                    // Hook to modify the fields 'title', 'fullContent' and 'teaser
-                    if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'] ?? null)) {
-                        foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent'] as $_classRef) {
-                            $_procObj = GeneralUtility::makeInstance($_classRef);
-                            $_procObj->modifyIndexContent($title, $fullContent, $teaser, $event);
-                        }
-                    }
-
-                    // ... and store the information in the index
+                    // Store the information in the index
                     $indexerObject->storeInIndex(
                         $indexerConfig['storagepid'], // storage PID
-                        $title, // record title
+                        $modifyIndexDataEvent->getTitle(), // record title
                         'sfeventmgt', // content type
                         $indexerConfig['targetpid'], // target PID: where is the single view?
-                        $fullContent, // indexed content, includes the title (linebreak after title)
+                        $modifyIndexDataEvent->getFullContent(), // indexed content, includes the title
                         $tags, // tags for faceted search
                         $params, // typolink params for singleview
-                        $teaser, // abstract; shown in result list if not empty
+                        $modifyIndexDataEvent->getTeaser(), // abstract; shown in result list if not empty
                         $event['sys_language_uid'], // language uid
                         $event['starttime'], // starttime
                         $event['endtime'], // endtime
                         $event['fe_group'], // fe_group
                         false, // debug only?
-                        $additionalFields // additionalFields
+                        $modifyIndexDataEvent->getAdditionalFields() // additionalFields
                     );
 
                     $eventCount++;

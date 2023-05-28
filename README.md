@@ -11,24 +11,15 @@ Indexer for ke_search which indexes sf_event_mgt records
 
 Install the extension and configure the indexer in the TYPO3 backend
 
-## Hooks
+## PSR-14 Events
 
-**modifyAdditionalFields**
+The extension currently contains the following PSR-14 event:
 
-```
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields']
-```
+* Derhansen\SfEventMgtIndexer\Indexer
+    * `ModifyIndexDataEvent`
 
-This hook can be used to modify/extend the additionalFields value (e.g., if it is required to index additional event
-properties like start- and enddate)
-
-**modifyIndexContent**
-
-```
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent']
-```
-
-This hook can be used to modify the content to index. See in code for details, which field values can be modified.
+This event can be used to modify `title`, `teaser`, `fullContent` and `additionalFields` before
+data is stored in the index.
 
 ## Versions
 
@@ -37,6 +28,17 @@ This hook can be used to modify the content to index. See in code for details, w
 | 4.x     | 11.5 - 12.4 | 7.4 - 8.2 | Features, Bugfixes, Security Updates |
 | 3.x     | 11.5        | 7.4 - 8.1 | Support dropped                      |
 | 2.x     | 8.7 - 10.4  | 7.0 - 7.4 | Security Updates                     |
+
+## Breaking changes
+
+###  Version 4.0.0
+
+The following hooks have been removed:
+
+* `$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields']`
+* `$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyIndexContent']`
+
+Users who previously used one of the removed hooks must use the new `ModifyIndexDataEvent` instead.
 
 ## Feedback and updates
 
