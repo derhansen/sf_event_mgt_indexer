@@ -35,10 +35,6 @@ class EventIndexer extends IndexerBase
 
     /**
      * sf_event_mgt indexer for ke_search
-     *
-     * @param array $indexerConfig Configuration from TYPO3 Backend
-     * @param IndexerRunner $indexerObject Reference to indexer class.
-     * @return string
      */
     public function customIndexer(array &$indexerConfig, IndexerRunner $indexerObject): string
     {
@@ -76,11 +72,11 @@ class EventIndexer extends IndexerBase
                         self::TABLE
                     );
 
-                    $additionalFields = array(
+                    $additionalFields =[
                         'sortdate' => $event['crdate'],
                         'orig_uid' => $event['uid'],
                         'orig_pid' => $event['pid'],
-                    );
+                    ];
 
                     // Hook to modify/extend additional fields (e.g. if start- and enddate should be indexed)
                     if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['sf_event_mgt_indexer']['modifyAdditionalFields'] ?? null)) {
