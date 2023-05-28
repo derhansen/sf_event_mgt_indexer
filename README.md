@@ -32,10 +32,11 @@ This hook can be used to modify the content to index. See in code for details, w
 
 ## Versions
 
-| Version             | TYPO3       | PHP       |
-| ------------------- | ----------- |-----------|
-| 3.0                 | 11.5        | 7.4 - 8.1 |
-| 2.x                 | 8.7 - 10.4  | 7.0 - 7.4 |
+| Version | TYPO3       | PHP       | Support/Development                  |
+|---------|-------------|-----------|--------------------------------------|
+| 4.x     | 11.5 - 12.4 | 7.4 - 8.2 | Features, Bugfixes, Security Updates |
+| 3.x     | 11.5        | 7.4 - 8.1 | Support dropped                      |
+| 2.x     | 8.7 - 10.4  | 7.0 - 7.4 | Security Updates                     |
 
 ## Feedback and updates
 
