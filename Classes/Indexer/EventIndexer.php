@@ -71,9 +71,9 @@ class EventIndexer extends IndexerBase
                     }
 
                     $title = strip_tags($event['title']);
-                    $teaser = strip_tags($event['teaser']);
-                    $content = strip_tags($event['description']);
-                    $program = strip_tags($event['program']);
+                    $teaser = strip_tags($event['teaser'] ?? '');
+                    $content = strip_tags($event['description'] ?? '');
+                    $program = strip_tags($event['program'] ?? '');
                     $metaKeywords = strip_tags($event['meta_keywords'] ?? '');
                     $metaDescription = strip_tags($event['meta_description'] ?? '');
                     $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program . "\n" .
