@@ -15,7 +15,7 @@ Install the extension and configure the indexer in the TYPO3 backend
 
 The extension currently contains the following PSR-14 event:
 
-* Derhansen\SfEventMgtIndexer\Indexer
+* Derhansen\SfEventMgtIndexer\Events
     * `ModifyIndexDataEvent`
 
 This event can be used to modify `title`, `teaser`, `fullContent` and `additionalFields` before
