@@ -31,6 +31,7 @@ class EventIndexer extends IndexerBase
 
     protected ConnectionPool $connectionPool;
     protected EventDispatcherInterface $eventDispatcher;
+    protected IndexerStatusService $indexerStatusService;
 
     /**
      * Initializes indexer for sf_event_mgt
