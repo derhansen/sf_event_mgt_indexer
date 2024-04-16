@@ -20,6 +20,7 @@ use Tpwd\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaSelectItems;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Tpwd\KeSearch\Service\IndexerStatusService;
 
 /**
  * Class EventIndexer
@@ -30,6 +31,19 @@ class EventIndexer extends IndexerBase
 
     protected ConnectionPool $connectionPool;
     protected EventDispatcherInterface $eventDispatcher;
+    protected IndexerStatusService $indexerStatusService;
+
+    /**
+     * Initializes indexer for sf_event_mgt
+     *
+     * @param IndexerRunner $pObj
+     */
+    public function __construct($pObj)
+    {
+        parent::__construct($pObj);
+        $this->pObj = $pObj;
+        $this->indexerStatusService = GeneralUtility::makeInstance(IndexerStatusService::class);
+    }
 
     /**
      * Registers the indexer configuration
@@ -61,6 +75,7 @@ class EventIndexer extends IndexerBase
             }
 
             $events = $this->getEvents($indexerConfig);
+            $eventsCount = count($events);
 
             $eventCount = 0;
             if (count($events)) {
@@ -69,6 +84,8 @@ class EventIndexer extends IndexerBase
                     if (!$this->eventHasCategoryOfIndexerConfig($event['uid'], $indexerConfig)) {
                         continue;
                     }
+
+                    $this->indexerStatusService->setRunningStatus($this->indexerConfig, $eventCount, $eventsCount);
 
                     $title = strip_tags($event['title']);
                     $teaser = strip_tags($event['teaser'] ?? '');
