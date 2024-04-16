@@ -75,6 +75,7 @@ class EventIndexer extends IndexerBase
             }
 
             $events = $this->getEvents($indexerConfig);
+            $eventsCount = count($events);
 
             $eventCount = 0;
             if (count($events)) {
@@ -84,7 +85,7 @@ class EventIndexer extends IndexerBase
                         continue;
                     }
 
-                    $this->indexerStatusService->setRunningStatus($this->indexerConfig, $eventCount, count($events));
+                    $this->indexerStatusService->setRunningStatus($this->indexerConfig, $eventCount, $eventsCount);
 
                     $title = strip_tags($event['title']);
                     $teaser = strip_tags($event['teaser'] ?? '');
