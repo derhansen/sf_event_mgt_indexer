@@ -27,8 +27,8 @@ data is stored in the index.
 |---------|-------------|-----------|--------------------------------------|
 | 5.x     | 12.4 - 13.4 | 8.1 - 8.3 | Features, Bugfixes, Security Updates |
 | 4.x     | 11.5 - 12.4 | 7.4 - 8.3 | Features, Bugfixes, Security Updates |
-| 3.x     | 11.5        | 7.4 - 8.3 | Support dropped                      |
-| 2.x     | 8.7 - 10.4  | 7.0 - 7.4 | Security Updates                     |
+| 3.x     | 11.5        | 7.4 - 8.3 | Security Updates                     |
+| 2.x     | 8.7 - 10.4  | 7.0 - 7.4 | Support dropped                      |
 
 ## Breaking changes
 
