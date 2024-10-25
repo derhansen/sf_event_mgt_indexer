@@ -35,18 +35,6 @@ class EventIndexer extends IndexerBase
     protected IndexerStatusService $indexerStatusService;
 
     /**
-     * Initializes indexer for sf_event_mgt
-     *
-     * @param IndexerRunner $pObj
-     */
-    public function __construct($pObj)
-    {
-        parent::__construct($pObj);
-        $this->pObj = $pObj;
-        $this->indexerStatusService = GeneralUtility::makeInstance(IndexerStatusService::class);
-    }
-
-    /**
      * Registers the indexer configuration
      */
     public function registerIndexerConfiguration(array &$params, TcaSelectItems $pObj): void
@@ -67,86 +55,91 @@ class EventIndexer extends IndexerBase
     {
         $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
         $this->eventDispatcher = GeneralUtility::makeInstance(EventDispatcherInterface::class);
+        $indexerStatusService = GeneralUtility::makeInstance(IndexerStatusService::class);
 
-        $content = '';
-        if ($indexerConfig['type'] === 'sfeventmgt') {
-            $indexPids = $this->getIndexerStoragePages($indexerConfig);
-            if ($indexPids === '') {
-                return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed - Error: No storage Pids configured</b></p>';
-            }
 
-            $events = $this->getEvents($indexerConfig);
-            $eventsCount = count($events);
-
-            $eventCount = 0;
-            if (count($events)) {
-                foreach ($events as $event) {
-                    // Check if indexing of event should be skipped due to indexer category restriction
-                    if (!$this->eventHasCategoryOfIndexerConfig($event['uid'], $indexerConfig)) {
-                        continue;
-                    }
-
-                    $this->indexerStatusService->setRunningStatus($this->indexerConfig, $eventCount, $eventsCount);
-
-                    $title = strip_tags($event['title']);
-                    $teaser = strip_tags($event['teaser'] ?? '');
-                    $content = strip_tags($event['description'] ?? '');
-                    $program = strip_tags($event['program'] ?? '');
-                    $metaKeywords = strip_tags($event['meta_keywords'] ?? '');
-                    $metaDescription = strip_tags($event['meta_description'] ?? '');
-                    $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program . "\n" .
-                        $metaKeywords . "\n" . $metaDescription;
-                    $params = '&tx_sfeventmgt_pieventdetail[action]=detail&tx_sfeventmgt_pieventdetail[controller]=Event&tx_sfeventmgt_pieventdetail[event]=' . $event['uid'];
-                    $tags = '#event#';
-
-                    // Add system categories as tags
-                    SearchHelper::makeSystemCategoryTags(
-                        $tags,
-                        $event['uid'],
-                        self::TABLE
-                    );
-
-                    $additionalFields =[
-                        'sortdate' => $event['crdate'],
-                        'orig_uid' => $event['uid'],
-                        'orig_pid' => $event['pid'],
-                    ];
-
-                    // PSR-14 event to allow modification of index data
-                    $modifyIndexDataEvent = new ModifyIndexDataEvent(
-                        $title,
-                        $teaser,
-                        $fullContent,
-                        $additionalFields,
-                        $event
-                    );
-                    $this->eventDispatcher->dispatch($modifyIndexDataEvent);
-
-                    // Store the information in the index
-                    $indexerObject->storeInIndex(
-                        $indexerConfig['storagepid'], // storage PID
-                        $modifyIndexDataEvent->getTitle(), // record title
-                        'sfeventmgt', // content type
-                        $indexerConfig['targetpid'], // target PID: where is the single view?
-                        $modifyIndexDataEvent->getFullContent(), // indexed content, includes the title
-                        $tags, // tags for faceted search
-                        $params, // typolink params for singleview
-                        $modifyIndexDataEvent->getTeaser(), // abstract; shown in result list if not empty
-                        $event['sys_language_uid'], // language uid
-                        $event['starttime'], // starttime
-                        $event['endtime'], // endtime
-                        $event['fe_group'], // fe_group
-                        false, // debug only?
-                        $modifyIndexDataEvent->getAdditionalFields() // additionalFields
-                    );
-
-                    $eventCount++;
-                }
-                $content = '<p><b>Event Indexer "' . $indexerConfig['title'] . '":</b><br/>' . $eventCount .
-                    ' Elements have been indexed.</p>';
-            }
+        if ($indexerConfig['type'] !== 'sfeventmgt') {
+            return '';
         }
-        return $content;
+
+        $indexPids = $this->getIndexerStoragePages($indexerConfig);
+        if ($indexPids === '') {
+            return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed - Error: No storage Pids configured</b></p>';
+        }
+
+        $events = $this->getEvents($indexerConfig);
+        $totalEvents = count($events);
+
+        if ($totalEvents === 0) {
+            return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" had no event to index.</b></p>';
+        }
+
+        $indexedEvents = 0;
+        foreach ($events as $event) {
+            // Check if indexing of event should be skipped due to indexer category restriction
+            if (!$this->eventHasCategoryOfIndexerConfig($event['uid'], $indexerConfig)) {
+                continue;
+            }
+
+            $indexerStatusService->setRunningStatus($indexerConfig, $indexedEvents, $totalEvents);
+
+            $title = strip_tags($event['title']);
+            $teaser = strip_tags($event['teaser'] ?? '');
+            $content = strip_tags($event['description'] ?? '');
+            $program = strip_tags($event['program'] ?? '');
+            $metaKeywords = strip_tags($event['meta_keywords'] ?? '');
+            $metaDescription = strip_tags($event['meta_description'] ?? '');
+            $fullContent = $title . "\n" . $teaser . "\n" . $content . "\n" . $program . "\n" .
+                $metaKeywords . "\n" . $metaDescription;
+            $params = '&tx_sfeventmgt_pieventdetail[action]=detail&tx_sfeventmgt_pieventdetail[controller]=Event&tx_sfeventmgt_pieventdetail[event]=' . $event['uid'];
+            $tags = '#event#';
+
+            // Add system categories as tags
+            SearchHelper::makeSystemCategoryTags(
+                $tags,
+                $event['uid'],
+                self::TABLE
+            );
+
+            $additionalFields =[
+                'sortdate' => $event['crdate'],
+                'orig_uid' => $event['uid'],
+                'orig_pid' => $event['pid'],
+            ];
+
+            // PSR-14 event to allow modification of index data
+            $modifyIndexDataEvent = new ModifyIndexDataEvent(
+                $title,
+                $teaser,
+                $fullContent,
+                $additionalFields,
+                $event
+            );
+            $this->eventDispatcher->dispatch($modifyIndexDataEvent);
+
+            // Store the information in the index
+            $indexerObject->storeInIndex(
+                $indexerConfig['storagepid'], // storage PID
+                $modifyIndexDataEvent->getTitle(), // record title
+                'sfeventmgt', // content type
+                $indexerConfig['targetpid'], // target PID: where is the single view?
+                $modifyIndexDataEvent->getFullContent(), // indexed content, includes the title
+                $tags, // tags for faceted search
+                $params, // typolink params for singleview
+                $modifyIndexDataEvent->getTeaser(), // abstract; shown in result list if not empty
+                $event['sys_language_uid'], // language uid
+                $event['starttime'], // starttime
+                $event['endtime'], // endtime
+                $event['fe_group'], // fe_group
+                false, // debug only?
+                $modifyIndexDataEvent->getAdditionalFields() // additionalFields
+            );
+
+            $indexedEvents++;
+        }
+
+        return '<p><b>Event Indexer "' . $indexerConfig['title'] . '":</b> ' . $indexedEvents .
+            ' Elements have been indexed.</p>';
     }
 
     /**
