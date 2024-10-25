@@ -18,16 +18,16 @@ $fields = [
             'renderType' => 'selectSingle',
             'items' => [
                 [
-                    'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:event_restriction.items.0',
-                    '0'
+                    'label' => 'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:event_restriction.items.0',
+                    'value' => '0'
                 ],
                 [
-                    'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:event_restriction.items.1',
-                    '1'
+                    'label' => 'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:event_restriction.items.1',
+                    'value' => '1'
                 ],
                 [
-                    'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:event_restriction.items.2',
-                    '2'
+                    'label' => 'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:event_restriction.items.2',
+                    'value' => '2'
                 ],
             ],
             'default' => 1,
@@ -44,12 +44,12 @@ $fields = [
             'renderType' => 'selectSingle',
             'items' => [
                 [
-                    'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:category_mode.items.0',
-                    '0'
+                    'label' => 'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:category_mode.items.0',
+                    'value' => '0'
                 ],
                 [
-                    'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:category_mode.items.1',
-                    '1'
+                    'label' => 'LLL:EXT:sf_event_mgt_indexer/Resources/Private/Language/locallang_db.xlf:category_mode.items.1',
+                    'value' => '1'
                 ],
             ],
             'default' => 0,
