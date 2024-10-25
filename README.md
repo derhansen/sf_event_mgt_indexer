@@ -25,8 +25,9 @@ data is stored in the index.
 
 | Version | TYPO3       | PHP       | Support/Development                  |
 |---------|-------------|-----------|--------------------------------------|
-| 4.x     | 11.5 - 12.4 | 7.4 - 8.2 | Features, Bugfixes, Security Updates |
-| 3.x     | 11.5        | 7.4 - 8.1 | Support dropped                      |
+| 5.x     | 12.4 - 13.4 | 8.1 - 8.3 | Features, Bugfixes, Security Updates |
+| 4.x     | 11.5 - 12.4 | 7.4 - 8.3 | Features, Bugfixes, Security Updates |
+| 3.x     | 11.5        | 7.4 - 8.3 | Support dropped                      |
 | 2.x     | 8.7 - 10.4  | 7.0 - 7.4 | Security Updates                     |
 
 ## Breaking changes

@@ -18,6 +18,7 @@ use Tpwd\KeSearch\Indexer\IndexerBase;
 use Tpwd\KeSearch\Indexer\IndexerRunner;
 use Tpwd\KeSearch\Lib\SearchHelper;
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaSelectItems;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -225,11 +226,11 @@ class EventIndexer extends IndexerBase
         );
         $where[] = $queryBuilder->expr()->eq(
             self::TABLE . '.uid',
-            $queryBuilder->createNamedParameter($eventUid, \PDO::PARAM_INT)
+            $queryBuilder->createNamedParameter($eventUid, Connection::PARAM_INT)
         );
         $where[] = $queryBuilder->expr()->eq(
             'sys_category_record_mm.tablenames',
-            $queryBuilder->createNamedParameter(self::TABLE, \PDO::PARAM_STR)
+            $queryBuilder->createNamedParameter(self::TABLE, Connection::PARAM_STR)
         );
 
         $catRes = $queryBuilder

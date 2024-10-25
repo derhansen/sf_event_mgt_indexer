@@ -7,12 +7,12 @@ $EM_CONF[$_EXTKEY] = [
     'author' => 'Torben Hansen',
     'author_email' => 'torben@derhansen.com',
     'state' => 'stable',
-    'version' => '4.0.1',
+    'version' => '5.0.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '11.5.0-12.4.99',
-            'sf_event_mgt' => '6.0.0-7.99.99',
-            'ke_search' => '4.0.0-5.99.99',
+            'typo3' => '12.4.0-13.4.99',
+            'sf_event_mgt' => '7.0.0-8.99.99',
+            'ke_search' => '6.0.0-6.99.99',
         ],
         'conflicts' => [],
         'suggests' => [],
