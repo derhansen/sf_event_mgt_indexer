@@ -102,7 +102,7 @@ class EventIndexer extends IndexerBase
             );
 
             $additionalFields =[
-                'sortdate' => $event['crdate'],
+                'sortdate' => $event['startdate'],
                 'orig_uid' => $event['uid'],
                 'orig_pid' => $event['pid'],
             ];
