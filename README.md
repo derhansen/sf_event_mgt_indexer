@@ -30,6 +30,10 @@ data is stored in the index.
 | 3.x     | 11.5        | 7.4 - 8.3 | Security Updates                     |
 | 2.x     | 8.7 - 10.4  | 7.0 - 7.4 | Support dropped                      |
 
+## Reporting a Vulnerability
+
+Please report vulnerabilities to [security@typo3.org](mailto:security@typo3.org).
+
 ## Breaking changes
 
 ###  Version 4.0.0
