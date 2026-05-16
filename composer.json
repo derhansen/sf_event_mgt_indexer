@@ -28,13 +28,17 @@
   },
   "extra": {
     "typo3/cms": {
-      "extension-key": "sf_event_mgt_indexer"
+      "extension-key": "sf_event_mgt_indexer",
+      "version": "6.0.0",
+      "Package": {
+        "providesPackages": []
+      }
     }
   },
   "require": {
     "ext-pdo": "*",
-    "typo3/cms-core": "^12.4 || ^13.4",
-    "derhansen/sf_event_mgt": "^7.0 || ^8.0",
-    "tpwd/ke_search": "^6.0"
+    "typo3/cms-core": "^13.4 || ^14.3",
+    "derhansen/sf_event_mgt": "^8.0 || ^9.0",
+    "tpwd/ke_search": "^7.0"
   }
 }

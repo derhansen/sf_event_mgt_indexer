@@ -1,4 +1,7 @@
 <?php
+
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 defined('TYPO3') or die();
 
 // enable "startingpoints_recursive" field
@@ -75,8 +78,8 @@ $fields = [
     ],
 ];
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('tx_kesearch_indexerconfig', $fields);
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
+ExtensionManagementUtility::addTCAcolumns('tx_kesearch_indexerconfig', $fields);
+ExtensionManagementUtility::addToAllTCAtypes(
     'tx_kesearch_indexerconfig',
     'index_extsfeventmgt_event_restriction, index_extsfeventmgt_category_mode, index_extsfeventmgt_category_selection',
     '',

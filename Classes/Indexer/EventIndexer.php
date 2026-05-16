@@ -17,15 +17,12 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Tpwd\KeSearch\Indexer\IndexerBase;
 use Tpwd\KeSearch\Indexer\IndexerRunner;
 use Tpwd\KeSearch\Lib\SearchHelper;
-use TYPO3\CMS\Backend\Form\FormDataProvider\TcaSelectItems;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\DataHandling\ItemProcessingService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Tpwd\KeSearch\Service\IndexerStatusService;
 
-/**
- * Class EventIndexer
- */
 class EventIndexer extends IndexerBase
 {
     const TABLE = 'tx_sfeventmgt_domain_model_event';
@@ -37,13 +34,13 @@ class EventIndexer extends IndexerBase
     /**
      * Registers the indexer configuration
      */
-    public function registerIndexerConfiguration(array &$params, TcaSelectItems $pObj): void
+    public function registerIndexerConfiguration(array &$params, ItemProcessingService $pObj): void
     {
         // add item to "type" field
         $newArray = [
             'Events (sf_event_mgt)',
             'sfeventmgt',
-            GeneralUtility::getFileAbsFileName('EXT:sf_event_mgt_indexer/Resources/Public/Icons/Extension.svg')
+            'ext-sfeventmgt-default'
         ];
         $params['items'][] = $newArray;
     }
@@ -64,7 +61,7 @@ class EventIndexer extends IndexerBase
 
         $indexPids = $this->getIndexerStoragePages($indexerConfig);
         if ($indexPids === '') {
-            return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed - Error: No storage Pids configured</b></p>';
+            return '<p><b>Event Indexer "' . $indexerConfig['title'] . '" failed – Error: No storage Pids configured</b></p>';
         }
 
         $events = $this->getEvents($indexerConfig);
